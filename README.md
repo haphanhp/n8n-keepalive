@@ -1,1 +1,35 @@
 # n8n-keepalive
+your-repo/
+├── .github/
+│   └── workflows/
+│       └── keepalive.yml
+└── README.md
+
+name: Keep n8n Render Service Awake
+
+# Chạy mỗi 10 phút để tránh service ngủ
+on:
+  schedule:
+    - cron: "*/10 * * * *"  # Mỗi 10 phút
+  workflow_dispatch:  # Cho phép chạy manual
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping n8n Service
+        run: |
+          echo "Pinging n8n service at $(date)"
+          # Ping main endpoint
+          curl -s -f https://n8n-ehv0.onrender.com/ > /dev/null && echo "✅ Main ping successful" || echo "❌ Main ping failed"
+          
+          # Optional: Ping health endpoint nếu n8n có
+          curl -s -f https://n8n-ehv0.onrender.com/healthz > /dev/null && echo "✅ Health check successful" || echo "ℹ️ Health endpoint not available"
+          
+          echo "Keepalive completed at $(date)"
+
+      - name: Log Status
+        run: |
+          echo "Service keepalive job completed successfully"
+          echo "Next run in 10 minutes"
